@@ -21,7 +21,7 @@ RUN apk update && apk add docker && apk add openssh
     #    -e 's/#PasswordAuthentication.*/PasswordAuthentication yes/' \
     #    -e 's/#SyslogFacility.*/SyslogFacility AUTH/' \
     #    -e 's/#LogLevel.*/LogLevel INFO/' \ 
-    && mkdir /var/run/sshd
+    #&& mkdir /var/run/sshd
 
 # setup user    
 RUN groupadd -g ${gid} ${group} \

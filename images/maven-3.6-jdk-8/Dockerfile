@@ -1,4 +1,3 @@
-# Build container
 FROM maven:3.6-jdk-8-alpine as build
 WORKDIR /usr/src/app
 

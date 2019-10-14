@@ -3,7 +3,7 @@ version: '3.1'
 services:
 
   master:
-    image: madena/jenkins
+    image: sourcegroove/jenkins-blueocean-1.19
     ports:
       - 9999:8080
       - 50000:50000
@@ -15,7 +15,7 @@ services:
       - jenkins-pass
 
   slave:
-    image: madena/jenkins-slave:latest
+    image: sourcegroove/jenkins-slave
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
         

@@ -1,4 +1,4 @@
-FROM php:7.2-apache-stretch as build
+FROM php:7.2-apache-stretch
 
 ENV PHP_OPCACHE_VALIDATE_TIMESTAMPS=1 \
 	PHP_OPCACHE_MAX_ACCELERATED_FILES=8000 \

@@ -13,18 +13,12 @@ services:
     secrets:
       - jenkins-user
       - jenkins-pass
-
-  slave:
-    image: sourcegroove/jenkins-slave
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
         
 secrets:
   jenkins-user:
     external: true
   jenkins-pass:
     external: true
-    
-    
+
 volumes:
   jenkins-data:

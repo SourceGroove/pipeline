@@ -1,4 +1,7 @@
-export IMAGE_VERSION=1.0.0
+export IMAGE_VERSION=1.0.1
+
+docker login -u sourcegroove 
+
 echo "Pushing images ${IMAGE_VERSION} & latest..."
 docker tag sourcegroove/springboot-jdk-8-build sourcegroove/springboot-jdk-8-build:${IMAGE_VERSION}
 docker push sourcegroove/springboot-jdk-8-build:${IMAGE_VERSION}

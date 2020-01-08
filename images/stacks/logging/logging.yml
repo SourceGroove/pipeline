@@ -1,0 +1,28 @@
+version: "3.7"
+
+services:
+  splunk:
+    image: splunk/splunk
+    volumes:
+      - splunk-etc:/opt/splunk/etc
+      - splunk-var:/opt/splunk/var
+    environment:
+      SPLUNK_ENABLE_LISTEN: 9997
+      SPLUNK_START_ARGS: --accept-license --no-prompt --answer-yes
+      SPLUNK_PASSWORD: s0mel0ngpassw0rd
+    ports:
+      - "8000:8000"
+      - "8088:8088"
+      - "9997:9997"
+    networks:
+      - default
+      - logging
+
+networks:
+  default:
+  logging:
+    attachable: true
+
+volumes:
+  splunk-etc: 
+  splunk-var: 

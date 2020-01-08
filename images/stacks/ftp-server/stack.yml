@@ -1,0 +1,7 @@
+version: "3.7"
+
+services:
+  ftp:
+      image: $IMAGE
+      ports:
+        - "$FTP_PORT:22"

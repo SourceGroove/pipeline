@@ -1,0 +1,44 @@
+pipeline {
+    agent any
+    parameters {
+        string(defaultValue: '', description: 'Deployment instance (aka docker stack name)', name: 'INSTANCE')
+        string(defaultValue: '', description: 'Ftp port on the host that the FTP server will bind to', name: 'FTP_PORT')
+    }
+    environment {
+        VERSION = "1.0.1"
+        IMAGE = "sourcegroove/ftp-server:${VERSION}.b${BUILD_NUMBER}"
+        INSTANCE="${params.INSTANCE}"
+        FTP_PORT="${params.FTP_PORT}"
+
+    }
+
+    stages {
+        
+        stage('Build ftp server') {
+            steps {
+                sh "docker build -t $IMAGE stacks/ftp-server"
+                sh "docker push $IMAGE"
+            }
+        }
+        stage('Deploy ftp server') {
+             when {
+                expression { env.FTP_PORT != null && env.FTP_PORT != '' && env.INSTANCE != null && env.INSTANCE != '' }
+            }
+            steps {
+                sh "docker pull $IMAGE"
+                sh "docker stack deploy -c stacks/ftp-server/stack.yml $INSTANCE"
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "Job completed succesfully"
+            slackSend(color: "#BDFFC3", message: "SUCCESS - build complete: ${env.JOB_NAME}.${env.BUILD_NUMBER}\n${env.BUILD_URL}")
+        }
+        failure {
+            echo "Job failed"
+            slackSend(color: "#FF9FA1", message: "FAILURE - build failed: ${env.JOB_NAME}.${env.BUILD_NUMBER}\n${env.BUILD_URL}")
+        }
+    }
+}

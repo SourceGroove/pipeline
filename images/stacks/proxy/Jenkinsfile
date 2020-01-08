@@ -1,0 +1,28 @@
+pipeline { 
+    agent any  
+    
+    stages {
+    	
+	    stage ('Deploy proxy stack') {
+    		steps {
+	        	script {
+                    sh "docker network create --attachable -d=overlay proxy"
+	            	sh "docker stack rm proxy"
+                    sh "docker stack deploy -c proxy.yml proxy"
+	        	}
+	    	}
+	    }
+	 }
+
+     post {
+        success {
+         	echo "Job completed succesfully"
+         	slackSend(color: "#BDFFC3", message: "Build successfull: ${env.JOB_NAME}.${env.BUILD_NUMBER}\n${env.BUILD_URL}")
+        }
+        failure {
+       		echo "Job failed"
+       		slackSend(color: "#FF9FA1", message: "Build failed: ${env.JOB_NAME}.${env.BUILD_NUMBER}\n${env.BUILD_URL}")
+        }
+    }
+    
+}

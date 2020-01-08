@@ -1,0 +1,30 @@
+groups:
+- name: rules
+  rules:
+  # Alert for any instance that is unreachable for >2 minutes.
+  - alert: ServiceDown
+    expr: up == 0
+    for: 2m
+    labels:
+      severity: page
+    annotations:
+      summary: "Instance {{ $labels.instance }} down"
+      description: "{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 2 minutes."
+
+  - alert: HighLoad
+    expr: node_load1 > 30.0
+    for: 2m
+    labels:
+      severity: page
+    annotations:
+      summary: "Instance {{ $labels.instance }} under high load"
+      description: "{{ $labels.instance }} of job {{ $labels.job }} is under high load."
+
+  - alert: ProbeFailed
+    expr: probe_success < 1
+    for: 2m
+    labels:
+      severity: page
+    annotations:
+      summary: "probe {{ $labels.job }} failing"
+      description: "probe {{ $labels.job }} failing."

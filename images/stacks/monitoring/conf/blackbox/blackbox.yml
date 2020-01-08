@@ -1,0 +1,7 @@
+modules:
+  service_monitor:
+    prober: http
+    timeout: 5s
+    http:
+      method: GET
+      valid_status_codes: [200]

@@ -1,0 +1,49 @@
+version: "3.7"
+
+services:
+  traefik:
+    image: traefik:v1.7 
+    ports:
+      - "443:443"
+      - "80:80"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - proxy
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      labels:
+        - "traefik.enable=true"
+        - "traefik.backend=traefik"
+        - "traefik.frontend.rule=PathPrefixStrip:/traefik"
+        - "traefik.frontend.priority=1"
+        - "traefik.port=9090"
+        - "traefik.docker.network=proxy"
+    configs:
+      - source: traefik.toml
+        target: /etc/traefik/traefik.toml
+    secrets:
+      - source: certificate.crt
+        target: certificate.crt
+        uid: "0"
+        mode: 400
+      - source: certificate.key
+        target: certificate.key
+        uid: "0"
+        mode: 400
+
+configs:
+  traefik.toml:
+    file: conf/traefik.toml
+secrets:
+  certificate.crt:
+    file: conf/certificate.crt
+    certificate.key:
+    file: conf/certificate.key
+
+networks:
+  proxy:
+    external: true

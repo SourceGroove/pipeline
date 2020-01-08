@@ -1,0 +1,104 @@
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+  external_labels:
+    monitor: 'docker-monitor'
+
+
+rule_files:
+  - 'alert.rules'
+
+alerting:
+  alertmanagers:
+  - scheme: http
+    path_prefix: "alertmanager/"
+    static_configs:
+    - targets:
+      - "monitoring_alertmanager:9093"
+
+
+###############################        
+# Tools
+###############################
+scrape_configs:
+  - job_name: 'prometheus'
+    scrape_interval: 5s
+    metrics_path: /prometheus/metrics
+    dns_sd_configs:
+      - names: 
+        - 'tasks.prometheus'
+        type: A
+        port: 9090
+
+  - job_name: 'alertmanager'
+    scrape_interval: 5s
+    metrics_path: /alertmanager/metrics
+    dns_sd_configs:
+      - names: 
+        - 'tasks.alertmanager'
+        type: A
+        port: 9093
+      
+  - job_name: 'cadvisor'
+    scrape_interval: 5s
+    dns_sd_configs:
+      - names: 
+        - 'tasks.cadvisor'
+        type: A
+        port: 8080
+    metric_relabel_configs:
+      - source_labels: ['image']
+        regex: '.*/(.*)$'
+        target_label: 'id'
+        replacement: '$1'
+
+  - job_name: 'node-exporter'
+    scrape_interval: 5s
+    dns_sd_configs:
+      - names: 
+        - 'tasks.node-exporter'
+        type: A
+        port: 9100
+        
+  - job_name: 'sqlserver-exporter'
+    scrape_interval: 5s
+    metrics_path: /metrics
+    dns_sd_configs:
+      - names: 
+        - 'tasks.sqlserver-exporter'
+        type: A
+        port: 4000
+        
+###############################        
+# prod
+###############################
+
+  - job_name: 'traefik'
+    scrape_interval: 5s
+    basic_auth:
+      username: 
+      password: 
+    dns_sd_configs:
+      - names: 
+        - 'tasks.proxy_public'
+        type: A
+        port: 8080
+        
+  - job_name: 
+    scrape_interval: 5s
+    basic_auth:
+      username: 
+      password: 
+    metrics_path: 
+    dns_sd_configs:
+      - names: 
+        - 'tasks.xxx'
+        type: A
+        port: 80
+    metric_relabel_configs:
+    - source_labels: ['job']
+      regex: '(.+?)(?:_|$)'
+      replacement: '$3'
+      target_label: 'environment' 

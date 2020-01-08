@@ -1,0 +1,45 @@
+################################################################
+# Global configuration
+################################################################
+
+# Log level
+logLevel = "DEBUG"
+
+# Acess Log
+#[accessLog]
+
+# Entrypoints definition
+defaultEntryPoints = ["https", "http"]
+[entryPoints]
+  [entryPoints.http]
+    address = ":80"
+    [entryPoints.http.redirect]
+      entryPoint = "https"
+      permanent = true
+
+  [entryPoints.https]
+    address = ":443"
+    [entryPoints.https.tls]
+    MinVersion = "VersionTLS12"
+    cipherSuites = ["TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305", "TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305","TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384", "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384", "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA", "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA"]
+      [[entryPoints.https.tls.certificates]]
+      CertFile = "/run/secrets/certificate.crt"
+      KeyFile = "/run/secrets/certificate.key"
+
+################################################################
+# Web Console configuration
+################################################################
+[web]
+address = ":9090"
+readOnly = true
+  [web.auth.basic]
+    users = ["xxx:xxx"]
+
+################################################################
+# Docker configuration backend
+################################################################
+[docker]
+endpoint = "unix:///var/run/docker.sock"
+watch = true
+swarmmode = true
+exposedbydefault = false

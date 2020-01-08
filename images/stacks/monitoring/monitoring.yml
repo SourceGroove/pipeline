@@ -1,0 +1,147 @@
+version: "3.7"
+
+services:
+
+  grafana:
+    image: grafana/grafana
+    environment:
+      - GF_SERVER_ROOT_URL=%(protocol)s://%(domain)s:/grafana
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SMTP_ENABLED=true
+      - GF_SMTP_HOST=
+      - GF_SMTP_USER=
+      - GF_SMTP_PASSWORD=
+      - GF_SMTP_FROM_ADDRESS=
+      - GF_SMTP_FROM_NAME=
+    networks:
+      - proxy
+    deploy:
+      replicas: 1
+      labels:
+        - "traefik.enable=true"
+        - "traefik.port=3000"
+        - "traefik.frontend.rule=PathPrefixStrip:/grafana"
+        - "traefik.docker.network=proxy"
+
+  prometheus:
+    image: prom/prometheus
+    user: root
+    networks:
+      - proxy
+    volumes:
+      - prometheus:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.external-url='
+    configs:
+      - source: alert.rules
+        target: /etc/prometheus/alert.rules
+      - source: prometheus.yml
+        target: /etc/prometheus/prometheus.yml
+    deploy:
+      replicas: 1
+      labels:
+        - "traefik.enable=true"
+        - "traefik.port=9090"
+        - "traefik.frontend.rule=PathPrefix:/prometheus"
+        - "traefik.docker.network=proxy"
+
+  alertmanager:
+    image: prom/alertmanager
+    volumes:
+      - alertmanager:/alertmanager
+    command:
+      - '--config.file=/etc/alertmanager/config.yml'
+      - '--storage.path=/alertmanager'
+    networks:
+      - default
+    configs:
+      - source: alertmanager.yml
+        target: /etc/alertmanager/config.yml
+    deploy:
+      replicas: 1
+
+  node-exporter:
+    image: quay.io/prometheus/node-exporter
+    user: root
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command: 
+      - '--path.procfs=/host/proc' 
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.ignored-mount-points'
+      - "^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)"
+    networks:
+      - default
+    deploy:
+      mode: global
+      resources:
+        limits:
+          #cpus: '0.20'
+          memory: 128M
+
+  cadvisor:
+    image: google/cadvisor
+    hostname: '{{.Node.ID}}'
+    user: root
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - default
+    deploy:
+      mode: global
+      resources:
+        limits:
+          memory: 128M
+
+  blackbox-exporter:
+    image: prom/blackbox-exporter
+    networks:
+      - default
+    command: --config.file=/conf/blackbox.yml
+    configs:
+      - source: blackbox.yml
+        target: /conf/blackbox.yml
+    deploy:
+      replicas: 1
+      
+  #sqlserver-exporter:
+  #  image: awaragi/prometheus-mssql-exporter
+  #  ports:
+  #    - "4000:4000"
+  #  environment: 
+  #    - "DEBUG=app"
+  #    - "SERVER=$DB_HOST"
+  #    - "USERNAME=$DB_USR"
+  #    - "PASSWORD=$DB_PSW"
+  #  networks:
+  #    - default
+  #  deploy:
+  #    replicas: 1
+
+configs:
+  alertmanager.yml:
+    file: conf/alertmanager/config.yml
+  prometheus.yml:
+    file: conf/prometheus/prometheus.yml
+  alert.rules:
+    file: conf/prometheus/alert.rules
+  blackbox.yml:
+    file: conf/blackbox/blackbox.yml
+
+networks:
+  default:
+  proxy:
+    external: true
+
+volumes:
+  prometheus:
+  alertmanager:

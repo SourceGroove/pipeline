@@ -1,0 +1,15 @@
+version: "3.7"
+
+services:
+
+  jenkins:
+    image: jenkinsci/blueocean:1.19.0
+    logging:
+      driver: splunk
+      options:
+        splunk-format: "json"
+        splunk-source: "app"
+        splunk-token: "f4e98052-e164-4f4e-a133-4c45ec9096de"
+        splunk-url: "http://host.docker.internal:8088"
+        splunk-insecureskipverify: "true"
+        tag: "{{.ImageName}}/{{.Name}}/{{.ID}}"

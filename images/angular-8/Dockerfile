@@ -1,6 +1,11 @@
+FROM node:12 as build
+WORKDIR /home
+RUN npm install -g @angular/cli@8.0.0
+COPY package.json package-lock.json ./
+RUN npm install
+COPY . . 
+RUN npm run prod
+
 FROM nginx:alpine
-ENV CONTEXT_ROOT=/
-
 COPY nginx.conf /etc/nginx/
-
-ONBUILD COPY --from=build /home/dist /usr/share/nginx/html
+COPY --from=build /home/dist /usr/share/nginx/html

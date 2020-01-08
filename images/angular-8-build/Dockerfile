@@ -7,3 +7,4 @@ ONBUILD COPY package.json package-lock.json ./
 ONBUILD RUN npm install
 ONBUILD COPY . . 
 ONBUILD RUN npm run prod
+ONBUILD RUN ls -la dist/
